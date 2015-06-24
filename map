@@ -1,0 +1,173 @@
+import java.awt.Graphics;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
+
+import javafx.scene.control.RadioButton;
+
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JPanel;
+
+public class Map extends JPanel implements Runnable{
+
+	private static final long serialVersionUID = 1L;
+	ImageIcon[][] tile= new ImageIcon[20][14];
+	RadioButton[] rb=new RadioButton[10];
+	JButton save;
+	JButton load;
+	JButton preview;
+	int col = 0 , row = 0;
+	int xp = 0,yp = 0;
+	int mx,my;
+	boolean eog = false;
+	public Map() {
+		setLayout(null);
+		save = new JButton();
+		save.setSize(80, 30);
+		save.setLocation(910, 10);
+		save.setText("Save");
+		this.add(save);
+		load =  new JButton();
+		load.setSize(80, 30);
+		load.setLocation(1000, 10);
+		load.setText("Load");
+		this.add(load);
+		preview = new JButton();
+		preview.setSize(80, 30);
+		preview.setLocation(1090, 10);
+		preview.setText("Preview");
+		this.add(preview);
+		ImageIcon water1 = new ImageIcon("pics\\sea1.png");
+	    JButton sea1 = new JButton(water1);
+	    sea1.setSize(50, 50);
+	    sea1.setLocation(1100, 50);
+	    this.add(sea1);
+	    ImageIcon water2 = new ImageIcon("pics\\sea2.png");
+	    JButton sea2 = new JButton(water2);
+	    sea2.setSize(50, 50);
+	    sea2.setLocation(1100, 110);
+	    this.add(sea2);
+	    ImageIcon land = new ImageIcon("pics\\1.png");
+	    JButton lands = new JButton(land);
+	    lands.setSize(50, 50);
+	    lands.setLocation(1100, 170);
+	    this.add(lands);
+	    ImageIcon tree = new ImageIcon("pics\\tree1.jpg");
+	    JButton trees = new JButton(tree);
+	    trees.setSize(50, 50);
+	    trees.setLocation(1100, 230);
+	    this.add(trees);
+	    ImageIcon iron = new ImageIcon("pics\\iron.jpg");
+	    JButton irons = new JButton(iron);
+	    irons.setSize(50,50);
+	    irons.setLocation(1100,290);
+	    this.add(irons);
+	    ImageIcon fish = new ImageIcon("pics\\fishes.jpg");
+	    JButton fishes = new JButton(fish);
+	    fishes.setSize(50,50);
+	    fishes.setLocation(1100,350);
+	    this.add(fishes);
+	    ImageIcon whale = new ImageIcon("pics\\whale.gif");
+	    JButton whales = new JButton(whale);
+	    whales.setSize(50,50);
+	    whales.setLocation(1100,410);
+	    this.add(whales);
+		this.setSize(1200,600);
+		setVisible(true);
+		for(int i=0;i<20;i++){
+			for(int j=0;j<14;j++){
+				tile[i][j] = new ImageIcon("pics\\sea1.png");
+			}
+		}
+		this.addMouseMotionListener(new MouseMotionListener() {
+			public void mouseDragged(MouseEvent e) {
+			}
+			public void mouseMoved(MouseEvent e) {
+				mx = e.getX();
+				my = e.getY();
+			}
+		});
+		this.addMouseListener(new MouseListener() {
+			
+			public void mouseReleased(MouseEvent arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			public void mousePressed(MouseEvent arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			public void mouseExited(MouseEvent arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			public void mouseEntered(MouseEvent arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			public void mouseClicked(MouseEvent arg0) {
+				// TODO Auto-generated method stub
+				int i = (mx)/50;
+				int j = (my)/50;
+				if(i<18 && j<12)
+				tile[i+row][j+col] = new ImageIcon("pics\\tree1.jpg");
+				
+			}
+		});
+		(new Thread(this)).start();
+	//	rb[0]=new RadioButton("deep water");
+	//	rb[1]=new RadioButton("shallow water");
+	//	rb[2]=new RadioButton("island");
+	//	for(int i=0;i<3;i++){
+			
+	//	}
+		
+	}
+	private void scrollcheck() {
+		if(mx > 850 && mx < 900 && row<2)
+			//xp-=50;
+			row++;
+		if(mx > 0 && mx < 20 && row>0)
+			//xp+=50;
+			row--;
+		if(my < 20 && my > 0 && col>0)
+		//	yp+=50;
+			col--;
+		if(my > 550 && my < 600 && col<2)
+		//	yp-=50;
+			col++;
+	}
+	
+
+	@Override
+	public void paint(Graphics g) {
+		super.paint(g);
+		for(int i=0;i<18;i++){
+			for(int j=0;j<12;j++){
+				g.drawImage(tile[i+row][j+col].getImage(),(i*50),(j*50),null);			
+			}
+		}
+		
+	
+	}
+
+	public void run() {
+		while(!eog){
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			scrollcheck();
+			this.repaint();
+		}
+	}
+
+
+	}
