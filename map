@@ -1,4 +1,7 @@
 import java.awt.Graphics;
+import java.awt.Image;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -9,26 +12,33 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 
-public class Map extends JPanel implements Runnable{
+public class Map extends JPanel implements Runnable, ActionListener,
+		MouseListener {
 
 	private static final long serialVersionUID = 1L;
-	ImageIcon[][] tile= new ImageIcon[20][14];
-	RadioButton[] rb=new RadioButton[10];
+	int[][] tile = new int[20][14];
+	public int temp;
+	int temp1;
 	JButton save;
 	JButton load;
 	JButton preview;
-	int col = 0 , row = 0;
-	int xp = 0,yp = 0;
-	int mx,my;
+	ImageIcon[][] image;
+	JButton[] button;
+	int sea1 = 0, sea2 = 1, land = 2, tree = 3, iron = 4, fish = 5, whale = 6;
+	int col = 0, row = 0;
+	int xp = 0, yp = 0;
+	int mx, my;
 	boolean eog = false;
+
 	public Map() {
 		setLayout(null);
+		temp = 1;
 		save = new JButton();
 		save.setSize(80, 30);
 		save.setLocation(910, 10);
 		save.setText("Save");
 		this.add(save);
-		load =  new JButton();
+		load = new JButton();
 		load.setSize(80, 30);
 		load.setLocation(1000, 10);
 		load.setText("Load");
@@ -38,126 +48,203 @@ public class Map extends JPanel implements Runnable{
 		preview.setLocation(1090, 10);
 		preview.setText("Preview");
 		this.add(preview);
-		ImageIcon water1 = new ImageIcon("pics\\sea1.png");
-	    JButton sea1 = new JButton(water1);
-	    sea1.setSize(50, 50);
-	    sea1.setLocation(1100, 50);
-	    this.add(sea1);
-	    ImageIcon water2 = new ImageIcon("pics\\sea2.png");
-	    JButton sea2 = new JButton(water2);
-	    sea2.setSize(50, 50);
-	    sea2.setLocation(1100, 110);
-	    this.add(sea2);
-	    ImageIcon land = new ImageIcon("pics\\1.png");
-	    JButton lands = new JButton(land);
-	    lands.setSize(50, 50);
-	    lands.setLocation(1100, 170);
-	    this.add(lands);
-	    ImageIcon tree = new ImageIcon("pics\\tree1.jpg");
-	    JButton trees = new JButton(tree);
-	    trees.setSize(50, 50);
-	    trees.setLocation(1100, 230);
-	    this.add(trees);
-	    ImageIcon iron = new ImageIcon("pics\\iron.jpg");
-	    JButton irons = new JButton(iron);
-	    irons.setSize(50,50);
-	    irons.setLocation(1100,290);
-	    this.add(irons);
-	    ImageIcon fish = new ImageIcon("pics\\fishes.jpg");
-	    JButton fishes = new JButton(fish);
-	    fishes.setSize(50,50);
-	    fishes.setLocation(1100,350);
-	    this.add(fishes);
-	    ImageIcon whale = new ImageIcon("pics\\whale.gif");
-	    JButton whales = new JButton(whale);
-	    whales.setSize(50,50);
-	    whales.setLocation(1100,410);
-	    this.add(whales);
-		this.setSize(1200,600);
+		image = new ImageIcon[7][16];
+		button = new JButton[7];
+		image[0][0] = new ImageIcon("pics\\sea1.png");
+		image[1][0] = new ImageIcon("pics\\sea2.png");
+		image[2][0] = new ImageIcon("pics\\1.png");
+		image[2][1] = new ImageIcon("pics\\2.png");
+		image[2][2] = new ImageIcon("pics\\3.png");
+		image[2][3] = new ImageIcon("pics\\4.png");
+		image[2][4] = new ImageIcon("pics\\5.png");
+		image[2][5] = new ImageIcon("pics\\6.png");
+		image[2][6] = new ImageIcon("pics\\7.png");
+		image[2][7] = new ImageIcon("pics\\8.png");
+		image[2][8] = new ImageIcon("pics\\9.png");
+		image[2][9] = new ImageIcon("pics\\10.png");
+		image[2][10] = new ImageIcon("pics\\11.png");
+		image[2][11] = new ImageIcon("pics\\12.png");
+		image[2][12] = new ImageIcon("pics\\13.png");
+		image[2][13] = new ImageIcon("pics\\14.png");
+		image[2][14] = new ImageIcon("pics\\15.png");
+		image[2][15] = new ImageIcon("pics\\16.png");
+		image[3][0] = new ImageIcon("pics\\tree1.png");
+		image[4][0] = new ImageIcon("pics\\iron.png");
+		image[5][0] = new ImageIcon("pics\\fishes.png");
+		image[6][0] = new ImageIcon("pics\\whale.png");
+		for (int i = 0; i < 7; i++) {
+			button[i] = new JButton(image[i][0]);
+			button[i].setSize(50, 50);
+			button[i].setLocation(1100, 50 + (i * 60));
+			this.add(button[i]);
+			button[i].addActionListener(this);
+		}
+		this.setSize(1200, 600);
 		setVisible(true);
-		for(int i=0;i<20;i++){
-			for(int j=0;j<14;j++){
-				tile[i][j] = new ImageIcon("pics\\sea1.png");
+		for (int i = 0; i < 20; i++) {
+			for (int j = 0; j < 14; j++) {
+				tile[i][j] = 0;
 			}
 		}
 		this.addMouseMotionListener(new MouseMotionListener() {
 			public void mouseDragged(MouseEvent e) {
 			}
+
 			public void mouseMoved(MouseEvent e) {
 				mx = e.getX();
 				my = e.getY();
 			}
 		});
-		this.addMouseListener(new MouseListener() {
-			
-			public void mouseReleased(MouseEvent arg0) {
-				// TODO Auto-generated method stub
-				
-			}
-			
-			public void mousePressed(MouseEvent arg0) {
-				// TODO Auto-generated method stub
-				
-			}
-			
-			public void mouseExited(MouseEvent arg0) {
-				// TODO Auto-generated method stub
-				
-			}
-			
-			public void mouseEntered(MouseEvent arg0) {
-				// TODO Auto-generated method stub
-				
-			}
-			
-			public void mouseClicked(MouseEvent arg0) {
-				// TODO Auto-generated method stub
-				int i = (mx)/50;
-				int j = (my)/50;
-				if(i<18 && j<12)
-				tile[i+row][j+col] = new ImageIcon("pics\\tree1.jpg");
-				
-			}
-		});
+		addMouseListener(this);
+
 		(new Thread(this)).start();
-	//	rb[0]=new RadioButton("deep water");
-	//	rb[1]=new RadioButton("shallow water");
-	//	rb[2]=new RadioButton("island");
-	//	for(int i=0;i<3;i++){
-			
-	//	}
-		
+
 	}
+
 	private void scrollcheck() {
-		if(mx > 850 && mx < 900 && row<2)
-			//xp-=50;
+		if (mx > 850 && mx < 900 && row < 2)
 			row++;
-		if(mx > 0 && mx < 20 && row>0)
-			//xp+=50;
+		if (mx > 0 && mx < 20 && row > 0)
 			row--;
-		if(my < 20 && my > 0 && col>0)
-		//	yp+=50;
+		if (my < 20 && my > 0 && col > 0)
 			col--;
-		if(my > 550 && my < 600 && col<2)
-		//	yp-=50;
+		if (my > 550 && my < 600 && col < 2)
 			col++;
 	}
-	
+
+	public ImageIcon selectland(int x, int y) {
+		int n = 0;
+		ImageIcon i=new ImageIcon("pics\\1.png");
+		if(y==0)
+			n+=0;
+		else if ((tile[x][y - 1] == 2) || (tile[x][y - 1] == 3) || ((tile[x][y - 1] == 4)))
+			n += 1;
+		if(x==19)
+			n+=0;
+		else if ((tile[x + 1][y] == 2) || (tile[x + 1][y] == 3) || (tile[x + 1][y] == 4))
+			n += 10;
+		if(y==13)
+			n+=0;
+		else if ((tile[x][y + 1] == 2) || (tile[x ][y+1] == 3) || (tile[x ][y+1] == 4))
+			n += 100;
+		if(x==0)
+			n+=0;
+		else if ((tile[x - 1][y] == 2) || (tile[x - 1][y] == 3) || (tile[x - 1][y] == 4))
+			n += 1000;
+		switch (n) {
+		case 0:
+			i = new ImageIcon("pics\\1.png");
+			break;
+		case 111:
+			i = new ImageIcon("pics\\2.png");
+			break;
+		case 1110:
+			i = new ImageIcon("pics\\3.png");
+			break;
+		case 1101:
+			i = new ImageIcon("pics\\4.png");
+			break;
+		case 1011:
+			i = new ImageIcon("pics\\5.png");
+			break;
+		case 110:
+			i = new ImageIcon("pics\\6.png");
+			break;
+		case 1100:
+			i = new ImageIcon("pics\\7.png");
+			break;
+		case 1001:
+			i = new ImageIcon("pics\\8.png");
+			break;
+		case 11:
+			i = new ImageIcon("pics\\9.png");
+			break;
+		case 100:
+			i = new ImageIcon("pics\\10.png");
+			break;
+		case 1000:
+			i = new ImageIcon("pics\\11.png");
+			break;
+		case 1:
+			i = new ImageIcon("pics\\12.png");
+			break;
+		case 10:
+			i = new ImageIcon("pics\\13.png");
+			break;
+		case 1111:
+			i = new ImageIcon("pics\\14.png");
+			break;
+		case 101:
+			i = new ImageIcon("pics\\15.png");
+			break;
+		case 1010:
+			i = new ImageIcon("pics\\16.png");
+			break;
+		}
+		return i;
+	}
 
 	@Override
 	public void paint(Graphics g) {
 		super.paint(g);
-		for(int i=0;i<18;i++){
-			for(int j=0;j<12;j++){
-				g.drawImage(tile[i+row][j+col].getImage(),(i*50),(j*50),null);			
+		for (int i = 0; i < 18; i++) {
+			for (int j = 0; j < 12; j++) {
+				switch (tile[i + row][j + col]) {
+				case 0:
+					g.drawImage(image[0][0].getImage(), (i * 50), (j * 50),
+							null);
+					break;
+				case 1:
+					g.drawImage(image[1][0].getImage(), (i * 50), (j * 50),
+							null);
+					break;
+				case 2: {
+					g.drawImage(image[0][0].getImage(), (i * 50), (j * 50),
+							null);
+					g.drawImage(selectland(i+row,j+col).getImage(), (i * 50), (j * 50),
+							null);
+				}
+					break;
+				case 3: {
+					g.drawImage(image[0][0].getImage(), (i * 50), (j * 50),
+							null);
+					g.drawImage(selectland(i+row,j+col).getImage(), (i * 50), (j * 50),
+							null);
+					g.drawImage(image[3][0].getImage(), (i * 50), (j * 50),
+							null);
+				}
+					break;
+				case 4: {
+					g.drawImage(image[0][0].getImage(), (i * 50), (j * 50),
+							null);
+					g.drawImage(selectland(i+row,j+col).getImage(), (i * 50), (j * 50),
+							null);
+					g.drawImage(image[4][0].getImage(), (i * 50), (j * 50),
+							null);
+				}
+					break;
+				case 5: {
+					g.drawImage(image[0][0].getImage(), (i * 50), (j * 50),
+							null);
+					g.drawImage(image[5][0].getImage(), (i * 50), (j * 50),
+							null);
+				}
+					break;
+				case 6: {
+					g.drawImage(image[0][0].getImage(), (i * 50), (j * 50),
+							null);
+					g.drawImage(image[6][0].getImage(), (i * 50), (j * 50),
+							null);
+				}
+					break;
+				}
 			}
 		}
-		
-	
+
 	}
 
 	public void run() {
-		while(!eog){
+		while (!eog) {
 			try {
 				Thread.sleep(100);
 			} catch (InterruptedException e) {
@@ -169,5 +256,89 @@ public class Map extends JPanel implements Runnable{
 		}
 	}
 
+	@Override
+	public void actionPerformed(ActionEvent e) {
+
+		if (e.getSource() == button[0])
+			temp = 0;
+		if (e.getSource() == button[1])
+			temp = 1;
+		if (e.getSource() == button[2])
+			temp = 2;
+		if (e.getSource() == button[3])
+			temp = 3;
+		if (e.getSource() == button[4])
+			temp = 4;
+		if (e.getSource() == button[5])
+			temp = 5;
+		if (e.getSource() == button[6])
+			temp = 6;
+	}
+
+	private boolean isalloyed(int i, int j, int temp2) {
+		// TODO Auto-generated method stub
+		switch(temp2){
+		case 3:{
+			if((tile[i][j]==2) || (tile[i][j]==4))
+				return true;
+			else 
+				return false;
+		}
+		case 4:{
+			if((tile[i][j]==2) || (tile[i][j]==3))
+				return true;
+			else
+				return false;
+		}
+		case 5:{
+			if((tile[i][j]==2) || (tile[i][j]==3) || (tile[i][j]==4))
+				return false;
+			else
+				return true;
+		}
+		case 6:{
+			if((tile[i][j]==2) || (tile[i][j]==3) || (tile[i][j]==4) || (tile[i][j]==0))
+				return false;
+			else
+				return true;
+		}
+		default:return true;
+		}	
+		
+	}
+	
+	@Override
+	public void mouseClicked(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+		int i = (mx) / 50;
+		int j = (my) / 50;
+
+		if ((i < 18 && j < 12) && isalloyed(i+row,j+col,temp))
+			tile[i + row][j + col] = temp;
+	}
+
+	@Override
+	public void mouseEntered(MouseEvent arg0) {
+		// TODO Auto-generated method stub
 
 	}
+
+	@Override
+	public void mouseExited(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void mousePressed(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void mouseReleased(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+
+	}
+
+}
