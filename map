@@ -1,3 +1,4 @@
+import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -132,7 +133,7 @@ public class Map extends JPanel implements Runnable, ActionListener,
 	}
 
 	private void scrollcheck() {
-		if (mx > 850 && mx < 900 && row < 2){
+		if (mx > 850 && mx < 900 && row < 22){
 			row++;
 	//		return;
 		}
@@ -144,7 +145,6 @@ public class Map extends JPanel implements Runnable, ActionListener,
 			col--;
 		if (my > 550 && my < 600 && mx>0 && mx<920 && col < 16)
 			col++;
-		}
 	}
 	public void save(String path) {
 		FileOutputStream fos = null;
@@ -387,12 +387,12 @@ public class Map extends JPanel implements Runnable, ActionListener,
 
 	public void run() {
 		while (!eog) {
-//			try {
-//				Thread.sleep(100);
-//			} catch (InterruptedException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			scrollcheck();
 			this.repaint();
 			d = d+3;
