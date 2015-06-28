@@ -102,13 +102,13 @@ public class Map extends JPanel implements Runnable, ActionListener,
 	}
 
 	private void scrollcheck() {
-		if (mx > 850 && mx < 900 && row < 2)
+		if (mx > 850 && mx < 900 && row < 22)
 			row++;
 		if (mx > 0 && mx < 20 && row > 0)
 			row--;
-		if (my < 20 && my > 0 && col > 0)
+		if (my < 20 && my > 0 && mx>0 && mx<920 && col > 0)
 			col--;
-		if (my > 550 && my < 600 && col < 2)
+		if (my > 550 && my < 600 && mx>0 && mx<920 && col < 16)
 			col++;
 	}
 
@@ -307,7 +307,7 @@ public class Map extends JPanel implements Runnable, ActionListener,
 		
 	}
 	
-	@Override
+@Override
 	public void mouseClicked(MouseEvent arg0) {
 		// TODO Auto-generated method stub
 		int i = (mx) / 50;
@@ -315,6 +315,22 @@ public class Map extends JPanel implements Runnable, ActionListener,
 
 		if ((i < 18 && j < 12) && isalloyed(i+row,j+col,temp))
 			tile[i + row][j + col] = temp;
+		if((mx>974) &&  (mx<1106) && (my>436) && (my<532)){
+			row=((mx-974)/6);
+			col=((my-436)/6);
+		}else if((mx>974) &&  (mx<1106)){
+			row=((mx-974)/6);
+			if (my<436)
+				col=0;
+			if(my>532)
+				col=16;
+		}else if((my>436) && (my<532)) {
+			col=((my-436)/6);
+			if (mx<974)
+				row=0;
+			if(mx>1106)
+				row=22;
+		}
 	}
 
 	@Override
