@@ -468,6 +468,12 @@ public class Map extends JPanel implements Runnable, ActionListener,
 	private boolean isalloyed(int i, int j, int temp2) {
 		// TODO Auto-generated method stub
 		switch(temp2){
+		case 2:{
+			if((tile[i][j]==1) || (tile[i][j]==6))
+				return false;
+			else 
+				return true;
+		}
 		case 3:{
 			if((tile[i][j]==2) || (tile[i][j]==4))
 				return true;
