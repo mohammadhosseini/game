@@ -318,13 +318,13 @@ public class Map extends JPanel implements Runnable, ActionListener,
 		if((mx>974) &&  (mx<1106) && (my>436) && (my<532)){
 			row=((mx-974)/6);
 			col=((my-436)/6);
-		}else if((mx>974) &&  (mx<1106)){
+		}else if((mx>974) &&  (mx<1106) && (mx>974) &&  (mx<1106) && (my>436) && (my<532)){
 			row=((mx-974)/6);
 			if (my<436)
 				col=0;
 			if(my>532)
 				col=16;
-		}else if((my>436) && (my<532)) {
+		}else if((my>436) && (my<532) && (mx>974) &&  (mx<1106) && (my>436) && (my<532)) {
 			col=((my-436)/6);
 			if (mx<974)
 				row=0;
