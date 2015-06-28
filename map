@@ -1,15 +1,21 @@
 import java.awt.Graphics;
-import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
-
-import javafx.scene.control.RadioButton;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 public class Map extends JPanel implements Runnable, ActionListener,
@@ -17,31 +23,43 @@ public class Map extends JPanel implements Runnable, ActionListener,
 
 	private static final long serialVersionUID = 1L;
 	int[][] tile = new int[20][14];
+	int [][]temptile = new int [20][14];
 	public int temp;
 	int temp1;
+	boolean saved ;
+	boolean loaded ;
 	JButton save;
 	JButton load;
 	JButton preview;
 	ImageIcon[][] image;
 	JButton[] button;
+	JFileChooser fc;
 	int sea1 = 0, sea2 = 1, land = 2, tree = 3, iron = 4, fish = 5, whale = 6;
 	int col = 0, row = 0;
 	int xp = 0, yp = 0;
 	int mx, my;
+	int d = 0;
 	boolean eog = false;
-
+	String path; 
+	JFileChooser fileChooser;
+	Human man;
+    int returnValue;
 	public Map() {
 		setLayout(null);
+		man = new Human(500,500,100,0);
+		fc = new JFileChooser();
 		temp = 1;
 		save = new JButton();
 		save.setSize(80, 30);
 		save.setLocation(910, 10);
 		save.setText("Save");
+		save.addActionListener(this);
 		this.add(save);
 		load = new JButton();
 		load.setSize(80, 30);
 		load.setLocation(1000, 10);
 		load.setText("Load");
+		load.addActionListener(this);
 		this.add(load);
 		preview = new JButton();
 		preview.setSize(80, 30);
@@ -88,6 +106,11 @@ public class Map extends JPanel implements Runnable, ActionListener,
 		}
 		this.addMouseMotionListener(new MouseMotionListener() {
 			public void mouseDragged(MouseEvent e) {
+				int i = (e.getX()) / 50;
+				int j = (e.getY()) / 50;
+
+				if ((i < 18 && j < 12) && isalloyed(i+row,j+col,temp))
+					tile[i + row][j + col] = temp;
 			}
 
 			public void mouseMoved(MouseEvent e) {
@@ -98,19 +121,89 @@ public class Map extends JPanel implements Runnable, ActionListener,
 		addMouseListener(this);
 
 		(new Thread(this)).start();
-
+		(new Thread(man)).start();
 	}
 
 	private void scrollcheck() {
-		if (mx > 850 && mx < 900 && row < 22)
+		if (mx > 850 && mx < 900 && row < 2){
 			row++;
-		if (mx > 0 && mx < 20 && row > 0)
+			return;
+		}
+		if (mx > 0 && mx < 20 && row > 0){
 			row--;
-		if (my < 20 && my > 0 && mx>0 && mx<920 && col > 0)
+			return;
+		}
+		if (my < 20 && my > 0 && col > 0){
 			col--;
-		if (my > 550 && my < 600 && mx>0 && mx<920 && col < 16)
+			return;
+		}
+		if (my > 550 && my < 600 && col < 2){
 			col++;
+			return;
+		}
 	}
+	public void save(String path) {
+		FileOutputStream fos = null;
+		try {
+			fos = new FileOutputStream(path);
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			saved = false;
+		}
+		ObjectOutputStream oos = null;
+		try {
+			oos = new ObjectOutputStream(fos);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			saved = false;
+		}
+		try {
+			oos.writeObject(tile);
+			saved = true;
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			saved = false;
+		}
+		
+	}
+	public void load(String path) {
+		
+		FileInputStream fis = null;
+		try {
+			fis = new FileInputStream(path);
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			loaded = false;
+		}
+		ObjectInputStream ois = null;
+		try {
+			ois = new ObjectInputStream(fis);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			loaded = false;
+		}
+		try {
+			temptile = (int[][]) ois.readObject();
+			loaded = true;
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			loaded = false;
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			loaded = false;
+		}
+		
+		tile = temptile;
+		
+	}
+	
 
 	public ImageIcon selectland(int x, int y) {
 		int n = 0;
@@ -240,23 +333,24 @@ public class Map extends JPanel implements Runnable, ActionListener,
 				}
 			}
 		}
+		g.drawImage(man.getPic().getImage(),man.getX(),man.getY(),null);
 
 	}
 
 	public void run() {
 		while (!eog) {
-			try {
-				Thread.sleep(100);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+//			try {
+//				Thread.sleep(100);
+//			} catch (InterruptedException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
 			scrollcheck();
 			this.repaint();
+			d = d+3;
 		}
 	}
 
-	@Override
 	public void actionPerformed(ActionEvent e) {
 
 		if (e.getSource() == button[0])
@@ -271,8 +365,47 @@ public class Map extends JPanel implements Runnable, ActionListener,
 			temp = 4;
 		if (e.getSource() == button[5])
 			temp = 5;
-		if (e.getSource() == button[6])
+		if (e.getSource() == button[6]){
 			temp = 6;
+		}
+		if (e.getSource() == save){
+			fileChooser = new JFileChooser();
+			 returnValue= fileChooser.showSaveDialog(null);
+	        if (returnValue == JFileChooser.APPROVE_OPTION) {
+	          File selectedFile = fileChooser.getSelectedFile();
+	          path = selectedFile.getAbsolutePath();
+	          save(path);
+	        }
+	        else
+	        	saved = false;
+			
+			if(saved){
+				JOptionPane.showMessageDialog(null,"Map saved");
+				return ;
+			}
+			else
+				JOptionPane.showMessageDialog(null,"Map was not saved!");
+			return ;
+			
+		}
+		if (e.getSource() == load){
+			 fileChooser = new JFileChooser();
+			 returnValue= fileChooser.showOpenDialog(null);
+	        if (returnValue == JFileChooser.APPROVE_OPTION) {
+	          File selectedFile = fileChooser.getSelectedFile();
+	          path = selectedFile.getAbsolutePath();
+	          load(path);
+	        }
+	        else
+	        	loaded = false;
+			if(loaded){
+				JOptionPane.showMessageDialog(null,"Map loaded");
+				return ;
+			}
+			else
+				JOptionPane.showMessageDialog(null,"Map was not loaded!");
+			return ;
+		}
 	}
 
 	private boolean isalloyed(int i, int j, int temp2) {
@@ -307,51 +440,31 @@ public class Map extends JPanel implements Runnable, ActionListener,
 		
 	}
 	
-@Override
 	public void mouseClicked(MouseEvent arg0) {
 		// TODO Auto-generated method stub
-		int i = (mx) / 50;
-		int j = (my) / 50;
+//		int i = (mx) / 50;
+//		int j = (my) / 50;
+//
+//		if ((i < 18 && j < 12) && isalloyed(i+row,j+col,temp))
+//			tile[i + row][j + col] = temp;
 
-		if ((i < 18 && j < 12) && isalloyed(i+row,j+col,temp))
-			tile[i + row][j + col] = temp;
-		if((mx>974) &&  (mx<1106) && (my>436) && (my<532)){
-			row=((mx-974)/6);
-			col=((my-436)/6);
-		}else if((mx>974) &&  (mx<1106) && (mx>974) &&  (mx<1106) && (my>436) && (my<532)){
-			row=((mx-974)/6);
-			if (my<436)
-				col=0;
-			if(my>532)
-				col=16;
-		}else if((my>436) && (my<532) && (mx>974) &&  (mx<1106) && (my>436) && (my<532)) {
-			col=((my-436)/6);
-			if (mx<974)
-				row=0;
-			if(mx>1106)
-				row=22;
-		}
 	}
 
-	@Override
 	public void mouseEntered(MouseEvent arg0) {
 		// TODO Auto-generated method stub
 
 	}
 
-	@Override
 	public void mouseExited(MouseEvent arg0) {
 		// TODO Auto-generated method stub
 
 	}
 
-	@Override
 	public void mousePressed(MouseEvent arg0) {
 		// TODO Auto-generated method stub
 
 	}
 
-	@Override
 	public void mouseReleased(MouseEvent arg0) {
 		// TODO Auto-generated method stub
 
