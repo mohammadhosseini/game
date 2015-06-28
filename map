@@ -328,7 +328,7 @@ public class Map extends JPanel implements Runnable, ActionListener,
 				}
 					break;
 				case 6: {
-					g.drawImage(image[0][0].getImage(), (i * 50), (j * 50),
+					g.drawImage(image[1][0].getImage(), (i * 50), (j * 50),
 							null);
 					g.drawImage(image[6][0].getImage(), (i * 50), (j * 50),
 							null);
@@ -472,16 +472,16 @@ public class Map extends JPanel implements Runnable, ActionListener,
 				return false;
 		}
 		case 5:{
-			if((tile[i][j]==2) || (tile[i][j]==3) || (tile[i][j]==4))
-				return false;
-			else
+			if(tile[i][j]==0)
 				return true;
+			else
+				return false;
 		}
 		case 6:{
-			if((tile[i][j]==2) || (tile[i][j]==3) || (tile[i][j]==4) || (tile[i][j]==0))
-				return false;
-			else
+			if(tile[i][j]==1)
 				return true;
+			else
+				return false;
 		}
 		default:return true;
 		}	
