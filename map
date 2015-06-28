@@ -216,11 +216,11 @@ public class Map extends JPanel implements Runnable, ActionListener,
 			n+=0;
 		else if ((tile[x][y - 1] == 2) || (tile[x][y - 1] == 3) || ((tile[x][y - 1] == 4)))
 			n += 1;
-		if(x==19)
+		if(x==39)
 			n+=0;
 		else if ((tile[x + 1][y] == 2) || (tile[x + 1][y] == 3) || (tile[x + 1][y] == 4))
 			n += 10;
-		if(y==13)
+		if(y==27)
 			n+=0;
 		else if ((tile[x][y + 1] == 2) || (tile[x ][y+1] == 3) || (tile[x ][y+1] == 4))
 			n += 100;
@@ -281,7 +281,7 @@ public class Map extends JPanel implements Runnable, ActionListener,
 		return i;
 	}
 
-	@Override
+@Override
 	public void paint(Graphics g) {
 		super.paint(g);
 		for (int i = 0; i < 18; i++) {
@@ -358,21 +358,29 @@ public class Map extends JPanel implements Runnable, ActionListener,
 				case 3:{
 					g.setColor(Color.GREEN);
 					g.fillRect(920+(i*6), 400+(j*6), 6, 6);
+					g.setColor(Color.gray);
+					g.fillRect(920+(i*6)+1, 400+(j*6)+1, 4, 4);
 				}
 				break;
 				case 4:{
 					g.setColor(Color.GREEN);
 					g.fillRect(920+(i*6), 400+(j*6), 6, 6);
+					g.setColor(Color.BLACK);
+					g.fillRect(920+(i*6)+1, 400+(j*6)+1, 4, 4);
 				}
 				break;
 				case 5:{
 					g.setColor(Color.blue);
 					g.fillRect(920+(i*6), 400+(j*6), 6, 6);
+					g.setColor(Color.ORANGE);
+					g.fillRect(920+(i*6)+1, 400+(j*6)+1, 4, 4);
 				}
 				break;
 				case 6:{
 					g.setColor(new Color(0,0,100));
 					g.fillRect(920+(i*6), 400+(j*6), 6, 6);
+					g.setColor(Color.gray);
+					g.fillRect(920+(i*6)+1, 400+(j*6)+1, 4, 4);
 				}
 				break;
 				
@@ -384,6 +392,7 @@ public class Map extends JPanel implements Runnable, ActionListener,
 	//	g.drawImage(man.getPic().getImage(),man.getX(),man.getY(),null);
 
 	}
+
 
 	public void run() {
 		while (!eog) {
@@ -495,21 +504,33 @@ public class Map extends JPanel implements Runnable, ActionListener,
 //
 //		if ((i < 18 && j < 12) && isalloyed(i+row,j+col,temp))
 //			tile[i + row][j + col] = temp;
-	if((mx>974) &&  (mx<1106) && (my>436) && (my<532)){
+if((mx>974) &&  (mx<1106) && (my>436) && (my<532)){
 			row=((mx-974)/6);
 			col=((my-436)/6);
-		}else if((mx>974) &&  (mx<1106) && (mx>974) &&  (mx<1106) && (my>436) && (my<532)){
-			row=((mx-974)/6);
-			if (my<436)
-				col=0;
-			if(my>532)
-				col=16;
-		}else if((my>436) && (my<532) && (mx>974) &&  (mx<1106) && (my>436) && (my<532)) {
+		}else if(mx>920 && mx<964 && my>436 && my<532){
 			col=((my-436)/6);
-			if (mx<974)
-				row=0;
-			if(mx>1106)
-				row=22;
+			row=0;
+		}else if(mx>1106 && mx<1160  && my>436 && my<532) {
+			col=((my-436)/6);
+			row=22;
+		}else if(my>400 && my<436 && mx>974 && mx<1106){
+			row=((mx-974)/6);
+			col=0;
+		}else if(my>532 && my<568 && mx>974 && mx<1106){
+			row=((mx-974)/6);
+			col=16;
+		}else if(mx>920 && mx<974 && my>400 && my<436){
+			row=0;
+			col=0;
+		}else if(mx>920 && mx<974 && my>532 && my<568){
+			row=0;
+			col=16;
+		}else if(mx>1106 && mx<1160 && my>400 && my<436){
+			row=22;
+			col=0;
+		}else if(mx>1106 && mx<1160 && my>532 && my<568){
+			row=22;
+			col=16;
 		}
 	}
 
