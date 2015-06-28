@@ -22,8 +22,8 @@ public class Map extends JPanel implements Runnable, ActionListener,
 		MouseListener {
 
 	private static final long serialVersionUID = 1L;
-	int[][] tile = new int[20][14];
-	int [][]temptile = new int [20][14];
+	int[][] tile = new int[40][28];
+	int [][]temptile = new int [40][28];
 	public int temp;
 	int temp1;
 	boolean saved ;
@@ -43,7 +43,7 @@ public class Map extends JPanel implements Runnable, ActionListener,
 	String path; 
 	JFileChooser fileChooser;
 	Human man;
-    int returnValue;
+        int returnValue;
 	public Map() {
 		setLayout(null);
 		man = new Human(500,500,100,0);
@@ -90,17 +90,24 @@ public class Map extends JPanel implements Runnable, ActionListener,
 		image[4][0] = new ImageIcon("pics\\iron.png");
 		image[5][0] = new ImageIcon("pics\\fishes.png");
 		image[6][0] = new ImageIcon("pics\\whale.png");
-		for (int i = 0; i < 7; i++) {
+		for (int i = 0; i < 4; i++) {
 			button[i] = new JButton(image[i][0]);
 			button[i].setSize(50, 50);
 			button[i].setLocation(1100, 50 + (i * 60));
 			this.add(button[i]);
 			button[i].addActionListener(this);
 		}
+		for (int i = 4; i < 7; i++) {
+			button[i] = new JButton(image[i][0]);
+			button[i].setSize(50, 50);
+			button[i].setLocation(1000, 50 + ((i-4) * 60));
+			this.add(button[i]);
+			button[i].addActionListener(this);
+		}
 		this.setSize(1200, 600);
 		setVisible(true);
-		for (int i = 0; i < 20; i++) {
-			for (int j = 0; j < 14; j++) {
+		for (int i = 0; i < 40; i++) {
+			for (int j = 0; j < 28; j++) {
 				tile[i][j] = 0;
 			}
 		}
@@ -127,19 +134,16 @@ public class Map extends JPanel implements Runnable, ActionListener,
 	private void scrollcheck() {
 		if (mx > 850 && mx < 900 && row < 2){
 			row++;
-			return;
+	//		return;
 		}
 		if (mx > 0 && mx < 20 && row > 0){
 			row--;
-			return;
+	//		return;
 		}
-		if (my < 20 && my > 0 && col > 0){
+		if (my < 20 && my > 0 && mx>0 && mx<920 && col > 0)
 			col--;
-			return;
-		}
-		if (my > 550 && my < 600 && col < 2){
+		if (my > 550 && my < 600 && mx>0 && mx<920 && col < 16)
 			col++;
-			return;
 		}
 	}
 	public void save(String path) {
@@ -333,7 +337,51 @@ public class Map extends JPanel implements Runnable, ActionListener,
 				}
 			}
 		}
-		g.drawImage(man.getPic().getImage(),man.getX(),man.getY(),null);
+		for (int i = 0; i < 40; i++) {
+			for (int j = 0; j < 28; j++) {
+				switch(tile[i][j]){
+				case 0:{
+					g.setColor(Color.BLUE);
+					g.fillRect(920+((i)*6), 400+((j)*6), 6, 6);
+				}
+				break;
+				case 1:{
+					g.setColor(new Color(0,0,100));
+					g.fillRect(920+(i*6), 400+(j*6), 6, 6);
+				}
+				break;
+				case 2:{
+					g.setColor(Color.GREEN);
+					g.fillRect(920+(i*6), 400+(j*6), 6, 6);
+				}
+				break;
+				case 3:{
+					g.setColor(Color.GREEN);
+					g.fillRect(920+(i*6), 400+(j*6), 6, 6);
+				}
+				break;
+				case 4:{
+					g.setColor(Color.GREEN);
+					g.fillRect(920+(i*6), 400+(j*6), 6, 6);
+				}
+				break;
+				case 5:{
+					g.setColor(Color.blue);
+					g.fillRect(920+(i*6), 400+(j*6), 6, 6);
+				}
+				break;
+				case 6:{
+					g.setColor(new Color(0,0,100));
+					g.fillRect(920+(i*6), 400+(j*6), 6, 6);
+				}
+				break;
+				
+				}
+			}
+		}
+		g.setColor(Color.YELLOW);
+		g.drawRect(920+(row*6), 400+(col*6), 108, 72);	
+	//	g.drawImage(man.getPic().getImage(),man.getX(),man.getY(),null);
 
 	}
 
@@ -447,7 +495,22 @@ public class Map extends JPanel implements Runnable, ActionListener,
 //
 //		if ((i < 18 && j < 12) && isalloyed(i+row,j+col,temp))
 //			tile[i + row][j + col] = temp;
-
+	if((mx>974) &&  (mx<1106) && (my>436) && (my<532)){
+			row=((mx-974)/6);
+			col=((my-436)/6);
+		}else if((mx>974) &&  (mx<1106) && (mx>974) &&  (mx<1106) && (my>436) && (my<532)){
+			row=((mx-974)/6);
+			if (my<436)
+				col=0;
+			if(my>532)
+				col=16;
+		}else if((my>436) && (my<532) && (mx>974) &&  (mx<1106) && (my>436) && (my<532)) {
+			col=((my-436)/6);
+			if (mx<974)
+				row=0;
+			if(mx>1106)
+				row=22;
+		}
 	}
 
 	public void mouseEntered(MouseEvent arg0) {
