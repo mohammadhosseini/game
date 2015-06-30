@@ -1,0 +1,77 @@
+import javax.swing.ImageIcon;
+
+
+public class Human implements Runnable{
+	ImageIcon pic;
+	int x,y;
+	int speed;
+	boolean isAlive = true;
+	int i = 0;
+	int direction;
+	int health;
+	public Human(int x,int y,int speed , int direction) {
+		this.x=x;
+		this.y=y;
+		this.speed=speed; 
+		this.direction = direction;		
+	}
+	public int getHealth() {
+		return health;
+	}
+	public int getX() {
+		return x;
+	}
+	public int getY() {	
+		return y;
+	}
+	public ImageIcon getPic() {
+		return pic;
+	}
+	public void setIsAlive(boolean isAlive){
+		this.isAlive=isAlive;
+	}
+	public boolean getIsAlive() {
+		return isAlive;
+	}
+	
+	public void run() {
+		while (isAlive){
+			try {
+				Thread.sleep(speed);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			i++;
+			switch(direction){
+				case 0 :
+					y -= 5;
+					pic = new ImageIcon("pics\\n"+(i%8)+".png");
+					if (y < 100)
+						direction = 3;
+					break;
+				case 1 :
+					y += 5;
+					pic = new ImageIcon("pics\\s"+(i%8)+".png");
+					if (y > 400)
+						direction = 2;
+					break;
+				case 2 :
+					x -= 5;
+					pic = new ImageIcon("pics\\w"+(i%8)+".png");
+					if (x < 100)
+						direction = 0;
+					break;
+				case 3 :
+					x += 5;
+					pic = new ImageIcon("pics\\e"+(i%8)+".png");
+					if (x > 400)
+						direction = 1;
+					break;
+			}
+			
+		}
+	}
+	
+}
