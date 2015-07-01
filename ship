@@ -9,11 +9,26 @@ public class Ship implements Runnable{
 	int i = 0;
 	int direction;
 	int health;
+	int food;
+	int humanNumber;
 	public Ship(int x,int y,int speed , int direction) {
+		pic = new ImageIcon("pics\\ship10.png"); 
 		this.x=x;
 		this.y=y;
 		this.speed=speed; 
 		this.direction = direction;
+	}
+	public void setHumanNumber(int humanNumber) {
+		this.humanNumber = humanNumber;
+	}
+	public int getHumanNumber() {
+		return humanNumber;
+	}
+	public void setFood(int food) {
+		this.food = food;
+	}
+	public int getFood() {
+		return food;
 	}
 	public int getHealth() {
 		return health;
