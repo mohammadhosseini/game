@@ -1,0 +1,56 @@
+import javax.swing.ImageIcon;
+
+
+public class Pier {
+	ImageIcon pic;
+	int x,y;
+	int wood = 2000;
+	int iron = 3000;
+	int humanNumber;
+	int shipNumber;
+	int food = 1000;
+	public Pier(int x, int y) {
+		pic = new ImageIcon("pics//pier.png");
+		this.x = x;
+		this.y = y;
+	}
+	public void setFood(int food) {
+		this.food = food;
+	}
+	public int getFood() {
+		return food;
+	}
+	public void setShipNumber(int shipNumber) {
+		this.shipNumber = shipNumber;
+	}
+	public int getShipNumber() {
+		return shipNumber;
+	}
+	public void setWood(int wood) {
+		this.wood = wood;
+	}
+	public void setIron(int iron) {
+		this.iron = iron;
+	}
+	public void setHumanNumber(int humanNumber) {
+		this.humanNumber = humanNumber;
+	}
+	public int getX() {
+		return x;
+	}
+	public int getY() {	
+		return y;
+	}
+	public int getWood() {
+		return wood;
+	}
+	public int getIron() {
+		return iron;
+	}
+	public int getHumanNumber() {
+		return humanNumber;
+	}
+	public ImageIcon getPic() {
+		return pic;
+	}
+}
