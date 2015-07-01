@@ -21,12 +21,24 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 public class GamePanel extends JPanel implements ActionListener,MouseMotionListener,MouseListener,Runnable {
-
+	int w = 0;
+	int i = 0;
+	int f = 0;
+	int h = 0;
+	int ns = 0;
+	int nh = 0;
+	boolean show;
 	int[][] tile = new int[40][28];
+	int[] pier;
 	int row=0,col=0;
 	int [][]temptile = new int [40][28];
 	boolean loaded,eog=false ;
+	static Vector<Pier> piers;
+	static Vector<Human> humans;
+	static Vector<Ship> ships;
 	JButton load;
+	JButton createhuman;
+	JButton createship;
 	JFileChooser fileChooser;
 	int returnValue;
 	String path; 
@@ -34,21 +46,54 @@ public class GamePanel extends JPanel implements ActionListener,MouseMotionListe
 	private static final long serialVersionUID = 1L;
 	public GamePanel() {
 		setLayout(null);
-		load = new JButton();
+		piers = new Vector<Pier>();
+		humans = new Vector<Human>();
+		ships = new Vector<Ship>();
+		pier=new int[8];
+		for(int i=0;i<8;i++)
+			pier[i]=0;
+		load = new JButton("Load");
 		load.setSize(80, 30);
 		load.setLocation(1000, 10);
-		load.setText("Load");
 		load.addActionListener(this);
 		this.add(load);
+		
+		createhuman = new JButton("Create Human");
+		createhuman.setSize(130, 20);
+		createhuman.setLocation(1000, 50);
+		createhuman.addActionListener(this);
+		this.add(createhuman);
+		createship = new JButton("Create Ship");
+		createship.setSize(130, 20);
+		createship.setLocation(1000, 80);
+		createship.addActionListener(this);
+		this.add(createship);
+		
+		for(Human i : humans){
+			(new Thread(i)).start();
+		}
+		for(Ship i : ships){
+			(new Thread(i)).start();
+		}
+		
 		addMouseMotionListener(this);
 		addMouseListener(this);
 		setVisible(true);
 		(new Thread(this)).start();
+
 	}
 
 	@Override
 	public void paint(Graphics g) {
 		super.paint(g);
+		if(show){
+			g.drawString("Wood : "+w, 920, 260);
+			g.drawString("Iron : "+i, 920, 280);
+			g.drawString("Health : "+h, 920, 300);
+			g.drawString("Food : "+f, 920, 320);
+			g.drawString("Number of Ships : "+ns, 920, 340);
+			g.drawString("Number of Humen : "+nh, 920, 360);
+		}
 		for (int i = 0; i < 18; i++) {
 			for (int j = 0; j < 12; j++) {
 				switch (tile[i + row][j + col]) {
@@ -155,19 +200,35 @@ public class GamePanel extends JPanel implements ActionListener,MouseMotionListe
 		g.setColor(Color.YELLOW);
 		g.drawRect(920+(row*6), 400+(col*6), 108, 72);	
 	//	g.drawImage(man.getPic().getImage(),man.getX(),man.getY(),null);
-		int a1;
-		if((a1=tile[setPier(2)[0]][(setPier(2)[1])+1])==0 || a1==1 || a1==5 || a1==6)
-			g.drawImage(new ImageIcon("pics\\pier.png").getImage(),(setPier(2)[0])*50, (setPier(2)[1]+1)*50,null);
-		else
-			g.drawImage(new ImageIcon("pics\\pier.png").getImage(),(setPier(2)[0])*50, (setPier(2)[1]-col-1)*50,null);
+		if((pier[0]-row)*50<900 && (pier[1]-col)*50<600 && loaded==true)
+			g.drawImage(piers.elementAt(0).getPic().getImage(),(pier[0]-row)*50, (pier[1]-col)*50,null);
+		if((pier[2]-row)*50<900 && (pier[3]-col)*50<600 && loaded==true)
+			g.drawImage(piers.elementAt(1).getPic().getImage(), (pier[2]-row)*50, (pier[3]-col)*50,null);
 		
-		if((a1=tile[setPier(2)[2]][setPier(2)[3]+1])==0 || a1==1 || a1==5 || a1==6)
-			g.drawImage(new ImageIcon("pics\\pier.png").getImage(), setPier(2)[2]*50, (setPier(2)[3]+1)*50,null);
-		else
-			g.drawImage(new ImageIcon("pics\\pier.png").getImage(), setPier(2)[2]*50, (setPier(2)[3]-1)*50,null);
+		if(!(humans.isEmpty())){
+			synchronized (humans) {
+				for(Human i : humans){
+					if(i.getX()-(row*50)+20 < 900)
+						g.drawImage(i.getPic().getImage(),i.getX()-(row*50),i.getY()-(col*50),null);
+				}
+			}
+		}
+		if(!(ships.isEmpty())){
+			synchronized (ships) {
+				for(Ship i : ships){
+					if(i.getX()-(row*50)+70 < 900)
+						g.drawImage(i.getPic().getImage(),i.getX()-(row*50),i.getY()-(col*50),null);
+				}
+			}
+		}
+//		if(!(humans.isEmpty())){
+//			synchronized (humans) {
+//			for(Human i : humans){
+//				i.paint(g);
+//			}
+//		}}
 	}
 
-	@Override
 	public void run() {
 		while (!eog) {
 			try {
@@ -179,7 +240,7 @@ public class GamePanel extends JPanel implements ActionListener,MouseMotionListe
 			scrollcheck();
 			this.repaint();
 		}		
-	}
+	}	
 	
 	private void scrollcheck() {
 		if (mx > 850 && mx < 900 && row < 22){
@@ -194,7 +255,7 @@ public class GamePanel extends JPanel implements ActionListener,MouseMotionListe
 			col++;
 		}
 	
-public void load(String path) {
+	public void load(String path) {
 		
 		FileInputStream fis = null;
 		try {
@@ -226,9 +287,14 @@ public void load(String path) {
 		}
 		
 		tile = temptile;
-		setPier(2);
+	//	for(int i=0;i<8;i++)
+//			pier[i]=setPier(2)[i];
+		pier = setPier(2);
+		piers.add(new Pier(pier[0]*50,pier[1]*50));
+		piers.add(new Pier(pier[2]*50,pier[3]*50));
 		this.repaint();
 	}
+
 	
 	public ImageIcon selectland(int x, int y) {
 		int n = 0;
@@ -329,6 +395,9 @@ public void load(String path) {
 		Vector <Integer>x=new Vector<Integer>(2,1);
 		Vector <Integer>y=new Vector<Integer>(2,1);
 		int counter=0;
+		int []a=new int[8];
+		for(int i=0;i<8;i++)
+			a[i]=0;
 		for(int i=1;i<39;i++){
 			for(int j=1;j<27;j++){
 				if(canBePier(i,j)){
@@ -339,8 +408,8 @@ public void load(String path) {
 				}
 			}
 		}
-		double [][] d=new double[counter][counter];//distance between every tow pierable tile(d[tile1][tile2])
-		double []temp=new double[(counter)*(counter-1)/2];//distance between every tow pierable tile in a one demontional array to sort and get the max distance(combination 2 from counter equals (counter)*(counter-1)/2)
+		double [][] d=new double[counter][counter];//distance between every two pierable tile(d[tile1][tile2])
+		double []temp=new double[(counter)*(counter-1)/2];//distance between every two pierable tile in a one demontional array to sort and get the max distance(combination 2 from counter equals (counter)*(counter-1)/2)
 		for(int i=0;i<counter;i++){
 			for(int j=0;j<counter;j++){
 				d[i][j]=0;
@@ -357,10 +426,8 @@ public void load(String path) {
 		}
 		
 		if(n==2){
-			int a[]=new int[4];
-//			double []sorted=new double[(counter)*(counter-1)/2];
+
 			Arrays.sort(temp);
-//			sorted=temp;
 			for(int i=0;i<counter;i++){
 				for(int j=i+1;j<counter;j++){
 					if(d[i][j]==temp[((counter)*(counter-1)/2)-1]){
@@ -378,27 +445,27 @@ public void load(String path) {
 			return a;
 		}
 		if(n==3){
-			int a1[]=new int[6];
-			return a1;
+			
+			return a;
 		}
 		if(n==4){
-			int a1[]=new int[8];
-			return a1;
+			
+			return a;
 		}
-		int a1[]=new int[4];
-		return a1;
+		
+		return a;
 	}
 	
-	@Override
- 	public void actionPerformed(ActionEvent e) {
+	public void actionPerformed(ActionEvent e) {
 		// TODO Auto-generated method stub
 		if (e.getSource() == load){
 			 fileChooser = new JFileChooser();
 			 returnValue= fileChooser.showOpenDialog(null);
 	        if (returnValue == JFileChooser.APPROVE_OPTION) {
-	          File selectedFile = fileChooser.getSelectedFile();
-	          path = selectedFile.getAbsolutePath();
-	          load(path);
+	        	File selectedFile = fileChooser.getSelectedFile();
+	        	path = selectedFile.getAbsolutePath();
+	        	load(path);
+	    		refresh();
 	        }
 	        else
 	        	loaded = false;
@@ -410,25 +477,56 @@ public void load(String path) {
 				JOptionPane.showMessageDialog(null,"Map was not loaded!");
 			return ;
 		}
+		if(e.getSource() == createhuman){
+			if(piers.elementAt(0).getFood() > 500 && piers.elementAt(0).getIron() >= 1000 && piers.elementAt(0).getWood() >= 1000){
+				add(1);
+				piers.elementAt(0).setIron(piers.elementAt(0).getIron()-1000);
+				piers.elementAt(0).setWood(piers.elementAt(0).getWood()-1000);
+				refresh();
+				
+				System.out.println(2222);
+				
+			}
+			else
+				JOptionPane.showMessageDialog(null,"Material is not enough !");
+		}
+		if(e.getSource() == createship){
+			if(piers.elementAt(0).getIron() >= 300 && piers.elementAt(0).getWood() >= 400){
+				add(2);
+				piers.elementAt(0).setIron(piers.elementAt(0).getIron()-300);
+				piers.elementAt(0).setWood(piers.elementAt(0).getWood()-400);
+				refresh();
+				System.out.println(3333);
+			}
+			else
+				JOptionPane.showMessageDialog(null,"Material is not enough !");
+		}
 	}
-
-	@Override
-	public void mouseDragged(MouseEvent arg0) {
+	public synchronized static void add(int i){
+		switch(i) {
+			case 1 :{
+		
+				synchronized (humans) {
+					Human h = new Human(piers.elementAt(0).getX(), piers.elementAt(0).getY(), 100, 2);
+					humans.add(h);
+					(new Thread (h)).start();
+				}
+			}break;
+			case 2 :{
+				synchronized (ships) {
+					Ship s = new Ship(piers.elementAt(0).getX(), piers.elementAt(0).getY(), 100, 2);
+					ships.add(s);
+					(new Thread (s)).start();
+				}
+			}break;
+		}
+	}
+  	public void mouseDragged(MouseEvent arg0) {
 		// TODO Auto-generated method stub
 		
 	}
-
-	@Override
-	public void mouseMoved(MouseEvent e) {
-		// TODO Auto-generated method stub
-		mx = e.getX();
-		my = e.getY();
-	}
-
-	@Override
-	public void mouseClicked(MouseEvent arg0) {
-		// TODO Auto-generated method stub
-		if((mx>974) &&  (mx<1106) && (my>436) && (my<532)){
+  	public void minimap(){
+  		if((mx>974) &&  (mx<1106) && (my>436) && (my<532)){
 			row=((mx-974)/6);
 			col=((my-436)/6);
 		}else if(mx>920 && mx<964 && my>436 && my<532){
@@ -456,27 +554,64 @@ public void load(String path) {
 			row=22;
 			col=16;
 		}
+  	}
+  	private void refresh() {
+  		w = piers.elementAt(0).getWood();
+		i = piers.elementAt(0).getIron();
+		nh = piers.elementAt(0).getHumanNumber();
+		ns = piers.elementAt(0).getShipNumber();
+		f = piers.elementAt(0).getFood();
+	}
+	public void mouseMoved(MouseEvent e) {
+		// TODO Auto-generated method stub
+		mx = e.getX();
+		my = e.getY();
+
 	}
 
-	@Override
+	public void mouseClicked(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+		show = false;
+		minimap();
+		
+		if(mx>piers.elementAt(0).getX()-(row*50) && mx<piers.elementAt(0).getX()-(row*50)+50 &&
+		   my>piers.elementAt(0).getY()-(col*50) && my<piers.elementAt(0).getY()-(col*50)+70){
+				show = true;
+				System.out.println(1111);
+//			f++;
+//			piers.elementAt(0).setFood(f);
+		}
+//		for(Human a : humans){
+//			if(mx>a.getX()-(row*50) && mx<a.getX()-(row*50)+20 &&
+//				my>a.getY()-(col*50) && my<a.getY()-(col*50)+20){
+//					labels(2,null,a,null);
+//					System.out.println(1111);
+//			}
+//		}
+//		for(Ship a :ships){
+//			if(mx>a.getX()-(row*50) && mx<a.getX()-(row*50)+75 &&
+//				my>a.getY()-(col*50) && my<a.getY()-(col*50)+75){
+//					labels(3,null,null,a);
+//					System.out.println(1111);
+//			}
+//		}
+	}
+
 	public void mouseEntered(MouseEvent arg0) {
 		// TODO Auto-generated method stub
 		
 	}
 
-	@Override
 	public void mouseExited(MouseEvent arg0) {
 		// TODO Auto-generated method stub
 		
 	}
 
-	@Override
 	public void mousePressed(MouseEvent arg0) {
 		// TODO Auto-generated method stub
 		
 	}
 
-	@Override
 	public void mouseReleased(MouseEvent arg0) {
 		// TODO Auto-generated method stub
 		
