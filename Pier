@@ -1,3 +1,5 @@
+import java.util.TimerTask;
+
 import javax.swing.ImageIcon;
 
 
@@ -9,10 +11,18 @@ public class Pier {
 	int humanNumber;
 	int shipNumber;
 	int food = 1000;
+	TimerTask t;
 	public Pier(int x, int y) {
 		pic = new ImageIcon("pics//pier.png");
 		this.x = x;
 		this.y = y;
+		t = new TimerTask() {
+			
+			@Override
+			public void run() {
+				food -= 5;
+			}
+		};
 	}
 	public void setFood(int food) {
 		this.food = food;
