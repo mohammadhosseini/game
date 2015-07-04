@@ -1,0 +1,163 @@
+public static void refresh() {
+  		w = piers.elementAt(0).getWood();
+		i = piers.elementAt(0).getIron();
+		nh = piers.elementAt(0).getHumanNumber();
+		ns = piers.elementAt(0).getShipNumber();
+		f = piers.elementAt(0).getFood();
+		if(!humans.isEmpty())
+			hh = humans.elementAt(0).getHealth();
+	}
+	
+	public synchronized static void add(int i){
+		switch(i) {
+			case 1 :{
+		
+				synchronized (humans) {
+					final Human h = new Human(piers.elementAt(0).getX(), piers.elementAt(0).getY(), 100, 2);
+					humans.add(h);
+					(new Thread (h)).start();
+					timer.schedule(h.t, 0 ,5000);
+				}
+			}break;
+			case 2 :{
+				synchronized (ships) {
+					Ship s = new Ship(piers.elementAt(0).getX(), piers.elementAt(0).getY(), 100, 2);
+					ships.add(s);
+					(new Thread (s)).start();
+				}
+			}break;
+		}
+	}
+	
+	public void actionPerformed(ActionEvent e) {
+		// TODO Auto-generated method stub
+		if (e.getSource() == load){
+			 fileChooser = new JFileChooser();
+			 returnValue= fileChooser.showOpenDialog(null);
+	        if (returnValue == JFileChooser.APPROVE_OPTION) {
+	        	File selectedFile = fileChooser.getSelectedFile();
+	        	path = selectedFile.getAbsolutePath();
+	        	load(path);
+	    		refresh();
+	    		timer.scheduleAtFixedRate(new TimerTask() {
+					
+					@Override
+					public void run() {
+						// TODO Auto-generated method stub
+						season++;
+						for (int i = 0; i < 40; i++) {
+							for (int j = 0; j < 28; j++) {
+								if(tile[i][j] == 3){
+									Map.image[3][0]= new ImageIcon("pics\\tree"+((season%4)+1)+".png");
+								}
+								if(tile[i][j] == 0){
+									if((season%4) == 3)
+										Map.image[0][0] = new ImageIcon("pics\\sea0.png");			
+									else
+										Map.image[0][0] = new ImageIcon("pics\\sea1.png");
+								}
+							}
+								
+						}
+					}
+				}, 0, 10000);
+	        }
+	        else
+	        	loaded = false;
+			if(loaded){
+				JOptionPane.showMessageDialog(null,"Map loaded");
+				return ;
+			}
+			else
+				JOptionPane.showMessageDialog(null,"Map was not loaded!");
+			return ;
+		}
+		if(e.getSource() == createhuman && loaded == true){
+			if(piers.elementAt(0).getFood() > 500 && piers.elementAt(0).getIron() >= 1000 && piers.elementAt(0).getWood() >= 1000){
+				add(1);
+				piers.elementAt(0).setHumanNumber(piers.elementAt(0).getHumanNumber()+1);
+				piers.elementAt(0).setIron(piers.elementAt(0).getIron()-1000);
+				piers.elementAt(0).setWood(piers.elementAt(0).getWood()-1000);
+				refresh();
+				
+				System.out.println(2222);
+				
+			}
+			else
+				JOptionPane.showMessageDialog(null,"Material is not enough !");
+		}
+		if(e.getSource() == createship && loaded == true){
+			if(piers.elementAt(0).getIron() >= 300 && piers.elementAt(0).getWood() >= 400){
+				add(2);
+				piers.elementAt(0).setShipNumber(piers.elementAt(0).getShipNumber()+1);
+				piers.elementAt(0).setIron(piers.elementAt(0).getIron()-300);
+				piers.elementAt(0).setWood(piers.elementAt(0).getWood()-400);
+				refresh();
+				
+				System.out.println(3333);
+			}
+			else
+				JOptionPane.showMessageDialog(null,"Material is not enough !");
+		}
+	}
+	
+	
+	//load
+	if(loaded){
+			new GamePanel();
+			tile = temptile;
+			pier = setPier(2);
+			piers.add(new Pier(pier[0]*50,pier[1]*50));
+			piers.add(new Pier(pier[2]*50,pier[3]*50));
+			timer.schedule(piers.elementAt(0).t,0, 5000);
+			this.repaint();
+		}
+		else{
+			for (int i = 0; i < 18; i++) {
+				for (int j = 0; j < 12; j++) {
+					tile[i + row][j + col] = 0;
+				}
+			}
+			
+		}
+		
+		
+		//paint
+		if(show){
+			g.drawString("Wood : "+w, 920, 260);
+			g.drawString("Iron : "+i, 920, 280);
+			g.drawString("Health : "+hh +" %", 920, 300);
+			g.drawString("Food : "+f, 920, 320);
+			g.drawString("Number of Ships : "+ns, 920, 340);
+			g.drawString("Number of Humen : "+nh, 920, 360);
+		}
+		
+		//constractor
+		createhuman = new JButton("Create Human");
+		createhuman.setSize(130, 20);
+		createhuman.setLocation(915, 180);
+		createhuman.addActionListener(this);
+		this.add(createhuman);
+		createship = new JButton("Create Ship");
+		createship.setSize(130, 20);
+		createship.setLocation(915, 210);
+		createship.addActionListener(this);
+		this.add(createship);
+		
+		timer = new Timer();
+		timer.scheduleAtFixedRate(new TimerTask() {
+			
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				if(!piers.isEmpty()){
+					w = piers.elementAt(0).getWood();
+					i = piers.elementAt(0).getIron();
+					nh = piers.elementAt(0).getHumanNumber();
+					ns = piers.elementAt(0).getShipNumber();
+					f = piers.elementAt(0).getFood();
+				}
+				if(!humans.isEmpty())
+					hh = humans.elementAt(0).getHealth();
+			}
+		}, 0, 100);
