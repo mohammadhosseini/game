@@ -1,23 +1,227 @@
+import java.awt.Graphics;
+import java.awt.Paint;
+import java.util.Arrays;
+import java.util.Vector;
+
 import javax.swing.ImageIcon;
+import javax.swing.JComponent;
+import javax.swing.Painter;
 
+import jdk.internal.org.objectweb.asm.tree.TryCatchBlockNode;
 
-public class Ship implements Runnable{
+public class Ship extends JComponent implements Runnable {
 	ImageIcon pic;
-	int x,y;
+	int x, y,X,Y,z=0;
+	PathTile [][]t=new PathTile[42][30];
 	int speed;
+	Vector<PathTile> path;
+	Vector<PathTile> removed;
+	Vector<PathTile> paths;
+	PathTile beginning,destination;
 	boolean isAlive = true;
-	int i = 0;
 	int direction;
 	int health;
-	int food;
-	int humanNumber;
-	public Ship(int x,int y,int speed , int direction) {
-		pic = new ImageIcon("pics\\ship10.png"); 
-		this.x=x;
-		this.y=y;
-		this.speed=speed; 
+	boolean canMove;
+	private int humanNumber;
+	private int food;
+	public Ship(int x, int y, int speed, int direction) {
+		canMove=false;
+		this.x = x+1;
+		X=(this.x)*50;
+		this.y = y+1;
+		Y=(this.y)*50;
+		this.speed = speed;
 		this.direction = direction;
+		pic=new ImageIcon("pics\\ship10.png");
+		path = new Vector<PathTile>(1, 1);
+		paths = new Vector<PathTile>(1, 1);
+		removed= new Vector<PathTile>(1, 1);
+		for(int i=0;i<42;i++){
+			t[i][0]=new PathTile();
+			t[i][29]=new PathTile();
+			t[i][0].isempty=false;
+			t[i][29].isempty=false;
+			t[i][0].x=i;
+			t[i][29].x=i;
+			t[i][0].y=0;
+			t[i][29].y=29;
+		}
+		
+		for(int j=1;j<29;j++){
+			t[0][j]=new PathTile();
+			t[41][j]=new PathTile();
+			t[0][j].isempty=false;
+			t[41][j].isempty=false;
+			t[0][j].x=0;
+			t[41][j].x=41;
+			t[0][j].y=j;
+			t[41][j].y=j;
+		}
+		for (int i = 0; i < 40; i++) {
+			for (int j = 0; j < 28; j++) {
+				int a = 0;
+				t[i+1][j+1]=new PathTile();
+				t[i+1][j+1].x=i+1;
+				t[i+1][j+1].y=j+1;
+				if ((a = GamePanel.tile[i][j]) == 2 || a == 3 || a == 4)
+					t[i+1][j+1].isempty = false;
+				else
+					t[i+1][j+1].isempty = true;
+			}
+		}
+		for (int i = 0; i < 42; i++) {
+			for (int j = 0; j < 30; j++) {
+				t[i][j].f=1000;
+				
+			}
+		}
 	}
+	
+	class PathTile{
+		int x;
+		int y;
+		int g;
+		int h;
+		int f;
+		int dir;
+		boolean isempty;
+		PathTile parent;
+	}
+	
+	public void path(PathTile start,PathTile end) {
+		if (start!=end) {
+			if(paths.contains(start))
+				paths.removeElement(start);
+			removed.add(start);
+			addNext(start,end,start.g+1);
+			path(selectBest(),end);
+		}
+		
+	}
+	
+	public void getPath(PathTile a){
+		if(a!=beginning){
+			z++;
+			path.add(a);
+			getPath(a.parent);
+		}
+	}
+
+	private PathTile selectBest() {
+		int best[]=new int[paths.size()];
+		for(int i=0;i<paths.size();i++)
+			best[i]=paths.elementAt(i).f;
+		try {
+			Arrays.sort(best);
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+		for(PathTile a:paths){
+			if(best[0]==a.f)
+				return a;
+		}
+		return t[1][1];
+	}
+
+	private void setF(PathTile a,PathTile end,int g) {
+		int f;
+		f=H(a,end)+g;
+		a.f=f;
+	}
+	
+	public int H(PathTile a,PathTile b){
+		int d;
+		d=Math.abs(a.x-b.x) + Math.abs(a.y-b.y);
+		return d;
+	}
+
+	public void addNext(PathTile a,PathTile end,int g) {
+		if(!removed.contains(t[a.x][a.y-1])){
+			if(paths.contains(t[a.x][a.y-1])){
+				if(H(t[a.x][a.y-1],end)+g<t[a.x][a.y-1].f)
+					setF(t[a.x][a.y-1],end,g);
+					t[a.x][a.y-1].parent=a;
+			}else if(t[a.x][a.y-1].isempty ){
+				setF(t[a.x][a.y-1],end,g);
+				t[a.x][a.y-1].parent=a;
+				paths.add(t[a.x][a.y-1]);
+			}
+		}
+		if(!removed.contains(t[a.x+1][a.y])){
+			if(paths.contains(t[a.x+1][a.y])){
+				if(H(t[a.x+1][a.y],end)+g<t[a.x+1][a.y].f)
+					setF(t[a.x+1][a.y],end,g);
+					t[a.x+1][a.y].parent=a;
+			}else if(t[a.x+1][a.y].isempty ){
+				setF(t[a.x+1][a.y],end,g);
+				t[a.x+1][a.y].parent=a;
+				paths.add(t[a.x+1][a.y]);
+			}
+		}
+		if(!removed.contains(t[a.x][a.y+1])){
+			if(paths.contains(t[a.x][a.y+1])){
+				if(H(t[a.x][a.y+1],end)+g<t[a.x][a.y+1].f)
+					setF(t[a.x][a.y+1],end,g);
+					t[a.x][a.y+1].parent=a;
+			}else if(t[a.x][a.y+1].isempty ){
+				setF(t[a.x][a.y+1],end,g);
+				t[a.x][a.y+1].parent=a;
+				paths.add(t[a.x][a.y+1]);
+			}
+		}
+		if(!removed.contains(t[a.x-1][a.y])){
+			if(paths.contains(t[a.x-1][a.y])){
+				if(H(t[a.x-1][a.y],end)+g<t[a.x-1][a.y].f)
+					setF(t[a.x-1][a.y],end,g);
+					t[a.x-1][a.y].parent=a;
+			}else if(t[a.x-1][a.y].isempty ){
+				setF(t[a.x-1][a.y],end,g);
+				t[a.x-1][a.y].parent=a;
+				paths.add(t[a.x-1][a.y]);
+			}
+		}
+	}
+
+	public void move() {
+		path(beginning,destination);
+		getPath(destination);
+		removed.clear();
+		paths.clear();
+		for (int i = 0; i < 42; i++) {
+			for (int j = 0; j < 30; j++) {
+				t[i][j].parent=null;		
+			}
+		}
+//		path.remove(path.lastElement());
+		for(int i=0;i<path.size();i++){
+			System.out.println(path.elementAt(i).x+","+path.elementAt(i).y);
+		}
+		System.out.println(path.lastElement().x);
+		System.out.println(path.lastElement().y);
+		System.out.println(x);
+		System.out.println(y);
+	}
+	
+	public void setx(int x) {
+		this.x = x+1;
+	}
+	
+	public void sety(int y) {
+		this.y = y+1;
+	}
+
+	public void setBeginning(int i,int j){
+		beginning =t[i+1][j+1];
+	}
+	
+	public void setDestination(int i,int j) {
+		destination=t[i+1][j+1];
+	}
+	
+	public int getHealth() {
+		return health;
+	}
+	
 	public void setHumanNumber(int humanNumber) {
 		this.humanNumber = humanNumber;
 	}
@@ -30,56 +234,97 @@ public class Ship implements Runnable{
 	public int getFood() {
 		return food;
 	}
-	public int getHealth() {
-		return health;
+
+	public int getx() {
+		return x-1;
 	}
+
+	public int gety() {
+		return y-1;
+	}
+	
 	public int getX() {
-		return x;
+		return X;
 	}
-	public int getY() {	
-		return y;
+	
+	public int getY() {
+		return Y;
 	}
+
 	public ImageIcon getPic() {
 		return pic;
 	}
+
+	@Override
+	public void paint(Graphics g) {
+		super.paint(g);
+		g.drawImage(pic.getImage(),X-50-(GamePanel.row*50),Y-50-(GamePanel.col*50),null);
+
+	}
 	
 	public void run() {
-		while (isAlive){
+		while (isAlive) {
 			try {
 				Thread.sleep(speed);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			
-			i++;
-			switch(direction){
-				case 0 :
-					y -= 5;
-					pic = new ImageIcon("pics\\ship10.png");
-					if (y < 100)
-						direction = 3;
-					break;
-				case 1 :
-					y += 5;
-					pic = new ImageIcon("pics\\ship11.png");
-					if (y > 400)
-						direction = 2;
-					break;
-				case 2 :
-					x -= 5;
-					pic = new ImageIcon("pics\\ship12.png");
-					if (x < 100)
-						direction = 0;
-					break;
-				case 3 :
-					x += 5;
-					pic = new ImageIcon("pics\\ship13.png");
-					if (x > 400)
-						direction = 1;
-					break;
+			try {
+				if(true){
+//					System.out.println("11111111111111111111111111111");
+					switch(path.lastElement().x-x){
+						case 1:direction=2;
+							break;
+						case -1:direction=4;
+							break;
+					}
+					switch(path.lastElement().y-y){
+						case 1:direction=3;
+							break;
+						case -1:direction=1;
+							break;
+					}
+					switch (direction) {
+						case 1:{
+							Y -= 5;
+							pic = new ImageIcon("pics\\ship10.png");
+							System.out.println("22222222222222222222222222222");
+							break;
+						}
+						case 2:{
+							X += 5;
+							pic = new ImageIcon("pics\\ship13.png");
+							System.out.println("33333333333333333333333333333");
+							break;
+						}
+						case 3:{
+							Y += 5;
+							pic = new ImageIcon("pics\\ship11.png");
+							System.out.println("44444444444444444444444444444");
+							break;
+						}
+						case 4:{
+							X -= 5;
+							pic = new ImageIcon("pics\\ship12.png");
+							System.out.println("55555555555555555555555555555");
+							break;
+						}
+					}
+					if((X/50 + X%50)==path.lastElement().x && (Y/50 + Y%50)==path.lastElement().y){
+						x=path.lastElement().x;
+						y=path.lastElement().y;
+						path.remove(path.lastElement());
+					}
+				}
+				System.out.println(path.lastElement().x);
+				System.out.println(path.lastElement().y);
+			} catch (Exception e) {
+				// TODO: handle exception
 			}
 			
+//			X +=5;
+			this.repaint();
 		}
 	}
 }
